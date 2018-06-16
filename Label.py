@@ -13,6 +13,7 @@ from libs.ChooseNameForm import *
 from libs.XMLIO import *
 from libs.Settings import *
 
+#this version is connected to github
 
 class MainWindow(QMainWindow):
     def __init__(self):

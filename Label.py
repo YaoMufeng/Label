@@ -14,7 +14,7 @@ from libs.XMLIO import *
 from libs.Settings import *
 
 #this version is connected to github
-
+#hahahaha
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()

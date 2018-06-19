@@ -228,8 +228,8 @@ class MyGraphicView(QGraphicsView):
         xBottom=sceneWidth if xBottom>sceneWidth else xBottom
         yBottom=sceneHeight if yBottom>sceneHeight else yBottom
 
-        width=math.fabs(xTop-xBottom)/self.currentScale
-        height=math.fabs(yTop-yBottom)/self.currentScale
+        width=math.fabs(xTop-xBottom)
+        height=math.fabs(yTop-yBottom)
  
         if isTemp:
             if self.tempItem==None:

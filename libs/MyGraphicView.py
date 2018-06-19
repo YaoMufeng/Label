@@ -173,6 +173,7 @@ class MyGraphicView(QGraphicsView):
         else:
             
             dPos=pos-self.lastPointPos
+
             dx=dPos.x()/self.currentScale
             dy=dPos.y()/self.currentScale
 
@@ -181,31 +182,19 @@ class MyGraphicView(QGraphicsView):
             geo=parentItem.rect()
             x,y,w,h=geo.x(),geo.y(),geo.width(),geo.height()
 
-            tempMoveItem.moveBy(dx,dy)
-
             if tempMoveItem==parentItem.subItemTopLeft:
                 parentItem.setRect(x+dx,y+dy,w-dx,h-dy)
-                parentItem.subItemBottomLeft.moveBy(dx,0)
-                parentItem.subItemTopRight.moveBy(0,dy)
             elif tempMoveItem==parentItem.subItemTopRight:
                 parentItem.setRect(x,y+dy,w+dx,h-dy)
-                parentItem.subItemTopLeft.moveBy(0,dy)
-                parentItem.subItemBottomRight.moveBy(dx,0)
             elif tempMoveItem==parentItem.subItemBottomLeft:
                 parentItem.setRect(x+dx,y,w-dx,h+dy)
-                parentItem.subItemTopLeft.moveBy(dx,0)
-                parentItem.subItemBottomRight.moveBy(0,dy)
             elif tempMoveItem==parentItem.subItemBottomRight:
                 parentItem.setRect(x,y,w+dx,h+dy)
-                parentItem.subItemBottomLeft.moveBy(0,dy)
-                parentItem.subItemTopRight.moveBy(dx,0)
 
             rect=parentItem.rect()
             newX,newY,newW,newH=rect.x(),rect.y(),rect.width(),rect.height()
 
             self.setCursor(Qt.ClosedHandCursor)
-
-
 
         self.lastPointPos=pos
 
@@ -403,9 +392,20 @@ class MyRectItem(QGraphicsRectItem):
         #node
         self.subItemTopLeft=MyNodeItem(self.x,self.y,self.nodeRadius*2,self.nodeRadius*2,self)
         self.subItemTopRight=MyNodeItem(self.x+self.w,self.y,self.nodeRadius*2,self.nodeRadius*2,self)
-
         self.subItemBottomLeft=MyNodeItem(self.x,self.y+self.h,self.nodeRadius*2,self.nodeRadius*2,self)
         self.subItemBottomRight=MyNodeItem(self.x+self.w,self.y+self.h,self.nodeRadius*2,self.nodeRadius*2,self)
+
+
+        self.subItemTopLeft.setSpanAngle(360*12)
+        self.subItemTopRight.setSpanAngle(360*12)
+        self.subItemTopRight.setStartAngle(360*12)
+
+        self.subItemBottomLeft.setSpanAngle(360*12)
+        self.subItemBottomLeft.setStartAngle(360*4)
+
+        self.subItemBottomRight.setSpanAngle(360*12)
+        self.subItemBottomRight.setStartAngle(360*8)
+
 
         self.scene.addItem(self.subItemTopLeft)
         self.scene.addItem(self.subItemTopRight)
@@ -477,10 +477,10 @@ class MyRectItem(QGraphicsRectItem):
 
 
     def moveBy(self,dx,dy):
-        self.subItemTopLeft.moveBy(dx,dy)
-        self.subItemTopRight.moveBy(dx,dy)
-        self.subItemBottomLeft.moveBy(dx,dy)
-        self.subItemBottomRight.moveBy(dx,dy)
+        #self.subItemTopLeft.moveBy(dx,dy)
+        #self.subItemTopRight.moveBy(dx,dy)
+        #self.subItemBottomLeft.moveBy(dx,dy)
+        #self.subItemBottomRight.moveBy(dx,dy)
         super().moveBy(dx,dy)
 
     def setRect(self,x,y,w,h):

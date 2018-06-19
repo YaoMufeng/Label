@@ -452,7 +452,6 @@ class MyRectItem(QGraphicsRectItem):
         self.lastPointPos=None
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setEnabled(True)
-        #self.setFlag(QGraphicsItem.ItemIsSelectable)
 
         self.brush=QBrush(QColor(255,255,255,0))
         self.selectedBrush=QBrush(QColor(0,128,255,128))
@@ -471,16 +470,12 @@ class MyRectItem(QGraphicsRectItem):
         
 
 
-        self.pen.setWidth(self.widthBase*self.mainWindow.graphicView.currentScale*0.5)
+        self.pen.setWidth(self.widthBase*self.mainWindow.graphicView.currentScale*0.1)
         self.setPen(self.pen)
         super().paint(painter,styleOptionGraphicsItem,param4)
 
 
     def moveBy(self,dx,dy):
-        #self.subItemTopLeft.moveBy(dx,dy)
-        #self.subItemTopRight.moveBy(dx,dy)
-        #self.subItemBottomLeft.moveBy(dx,dy)
-        #self.subItemBottomRight.moveBy(dx,dy)
         super().moveBy(dx,dy)
 
     def setRect(self,x,y,w,h):

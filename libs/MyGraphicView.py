@@ -400,7 +400,7 @@ class MyRectItem(QGraphicsRectItem):
         self.initNode()
 
     def initNode(self):
-
+        #node
         self.subItemTopLeft=MyNodeItem(self.x,self.y,self.nodeRadius*2,self.nodeRadius*2,self)
         self.subItemTopRight=MyNodeItem(self.x+self.w,self.y,self.nodeRadius*2,self.nodeRadius*2,self)
 

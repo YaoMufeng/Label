@@ -174,9 +174,6 @@ class MyGraphicView(QGraphicsView):
             
             dPos=pos-self.lastPointPos
 
-            #dx=dPos.x()
-            #dy=dPos.y()
-
             dx=dPos.x()/self.currentScale
             dy=dPos.y()/self.currentScale
 
@@ -184,7 +181,6 @@ class MyGraphicView(QGraphicsView):
 
             geo=parentItem.rect()
             x,y,w,h=geo.x(),geo.y(),geo.width(),geo.height()
-
 
             if tempMoveItem==parentItem.subItemTopLeft:
                 parentItem.setRect(x+dx,y+dy,w-dx,h-dy)
@@ -195,13 +191,10 @@ class MyGraphicView(QGraphicsView):
             elif tempMoveItem==parentItem.subItemBottomRight:
                 parentItem.setRect(x,y,w+dx,h+dy)
 
-
             rect=parentItem.rect()
             newX,newY,newW,newH=rect.x(),rect.y(),rect.width(),rect.height()
 
             self.setCursor(Qt.ClosedHandCursor)
-
-
 
         self.lastPointPos=pos
 
@@ -399,9 +392,20 @@ class MyRectItem(QGraphicsRectItem):
 
         self.subItemTopLeft=MyNodeItem(self.x,self.y,self.nodeRadius*2,self.nodeRadius*2,self)
         self.subItemTopRight=MyNodeItem(self.x+self.w,self.y,self.nodeRadius*2,self.nodeRadius*2,self)
-
         self.subItemBottomLeft=MyNodeItem(self.x,self.y+self.h,self.nodeRadius*2,self.nodeRadius*2,self)
         self.subItemBottomRight=MyNodeItem(self.x+self.w,self.y+self.h,self.nodeRadius*2,self.nodeRadius*2,self)
+
+
+        self.subItemTopLeft.setSpanAngle(360*12)
+        self.subItemTopRight.setSpanAngle(360*12)
+        self.subItemTopRight.setStartAngle(360*12)
+
+        self.subItemBottomLeft.setSpanAngle(360*12)
+        self.subItemBottomLeft.setStartAngle(360*4)
+
+        self.subItemBottomRight.setSpanAngle(360*12)
+        self.subItemBottomRight.setStartAngle(360*8)
+
 
         self.scene.addItem(self.subItemTopLeft)
         self.scene.addItem(self.subItemTopRight)

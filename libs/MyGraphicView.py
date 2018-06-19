@@ -173,6 +173,10 @@ class MyGraphicView(QGraphicsView):
         else:
             
             dPos=pos-self.lastPointPos
+
+            #dx=dPos.x()
+            #dy=dPos.y()
+
             dx=dPos.x()/self.currentScale
             dy=dPos.y()/self.currentScale
 
@@ -181,24 +185,16 @@ class MyGraphicView(QGraphicsView):
             geo=parentItem.rect()
             x,y,w,h=geo.x(),geo.y(),geo.width(),geo.height()
 
-            tempMoveItem.moveBy(dx,dy)
 
             if tempMoveItem==parentItem.subItemTopLeft:
                 parentItem.setRect(x+dx,y+dy,w-dx,h-dy)
-                parentItem.subItemBottomLeft.moveBy(dx,0)
-                parentItem.subItemTopRight.moveBy(0,dy)
             elif tempMoveItem==parentItem.subItemTopRight:
                 parentItem.setRect(x,y+dy,w+dx,h-dy)
-                parentItem.subItemTopLeft.moveBy(0,dy)
-                parentItem.subItemBottomRight.moveBy(dx,0)
             elif tempMoveItem==parentItem.subItemBottomLeft:
                 parentItem.setRect(x+dx,y,w-dx,h+dy)
-                parentItem.subItemTopLeft.moveBy(dx,0)
-                parentItem.subItemBottomRight.moveBy(0,dy)
             elif tempMoveItem==parentItem.subItemBottomRight:
                 parentItem.setRect(x,y,w+dx,h+dy)
-                parentItem.subItemBottomLeft.moveBy(0,dy)
-                parentItem.subItemTopRight.moveBy(dx,0)
+
 
             rect=parentItem.rect()
             newX,newY,newW,newH=rect.x(),rect.y(),rect.width(),rect.height()
@@ -477,10 +473,10 @@ class MyRectItem(QGraphicsRectItem):
 
 
     def moveBy(self,dx,dy):
-        self.subItemTopLeft.moveBy(dx,dy)
-        self.subItemTopRight.moveBy(dx,dy)
-        self.subItemBottomLeft.moveBy(dx,dy)
-        self.subItemBottomRight.moveBy(dx,dy)
+        #self.subItemTopLeft.moveBy(dx,dy)
+        #self.subItemTopRight.moveBy(dx,dy)
+        #self.subItemBottomLeft.moveBy(dx,dy)
+        #self.subItemBottomRight.moveBy(dx,dy)
         super().moveBy(dx,dy)
 
     def setRect(self,x,y,w,h):

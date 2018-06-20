@@ -206,10 +206,13 @@ class MyGraphicView(QGraphicsView):
         x1=self.pressedPointPos.x()
         y1=self.pressedPointPos.y()
 
+        sceneWidth,sceneHeight=self.graphicScene.width(),self.graphicScene.height()
+
+
         x2=pos.x()
         y2=pos.y()
 
-        sceneWidth,sceneHeight=self.graphicScene.width(),self.graphicScene.height()
+
 
         newPoint1=self.mapToScene(x1,y1)
         newPoint2=self.mapToScene(x2,y2)
@@ -217,10 +220,15 @@ class MyGraphicView(QGraphicsView):
         x1,y1=newPoint1.x(),newPoint1.y()
         x2,y2=newPoint2.x(),newPoint2.y()
 
+        if x1<0 or y1<0 or x1>sceneWidth or y1>sceneHeight:
+            return
+
         xTop=x1 if x1<x2 else x2
         yTop=y1 if y1<y2 else y2
         xBottom=x2 if x1<x2 else x1
         yBottom=y2 if y1<y2 else y1
+
+
 
         xTop=0 if xTop<0 else xTop
         yTop=0 if yTop<0 else yTop
@@ -432,6 +440,9 @@ class MyRectItem(QGraphicsRectItem):
         self.name=''
         self.widthBase=2
         self.nodeRadius=4
+
+        self.sceneWidth=self.scene.width()
+        self.sceneHeight=self.scene.height()
     
     def initPen(self):
         self.pen=QPen(QColor(255,0,0,255))
@@ -487,6 +498,9 @@ class MyRectItem(QGraphicsRectItem):
 
         xBottomRight=x+w
         yBottomRight=y+h
+
+        if xTopLeft<0 or yTopLeft<0 or xBottomRight>self.sceneWidth or yBottomRight>self.sceneHeight:
+            return
 
         threshDis=10
 

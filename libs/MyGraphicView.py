@@ -482,11 +482,27 @@ class MyRectItem(QGraphicsRectItem):
         rect=self.subItemTopLeft.rect()
         w0,h0=rect.width(),rect.height()
 
-        self.subItemTopLeft.setRect(x-w0/2,y-h0/2,w0,h0)
-        self.subItemTopRight.setRect(x-w0/2+w,y-h0/2,w0,h0)
-        self.subItemBottomLeft.setRect(x-w0/2,y-h0/2+h,w0,h0)
-        self.subItemBottomRight.setRect(x-w0/2+w,y-h0/2+h,w0,h0)
-        super().setRect(x,y,w,h)
+        xTopLeft=x
+        yTopLeft=y
+
+        xBottomRight=x+w
+        yBottomRight=y+h
+
+        threshDis=10
+
+        xBottomRight=x+threshDis if (xBottomRight<x+threshDis) else xBottomRight
+        yBottomRight=y+threshDis if (yBottomRight<y+threshDis) else yBottomRight
+
+        self.subItemTopLeft.setRect(xTopLeft-w0/2,yTopLeft-h0/2,w0,h0)
+        self.subItemTopRight.setRect(xBottomRight-w0/2,yTopLeft-h0/2,w0,h0)
+        self.subItemBottomLeft.setRect(xTopLeft-w0/2,yBottomRight-h0/2,w0,h0)
+        self.subItemBottomRight.setRect(xBottomRight-w0/2,yBottomRight-h0/2,w0,h0)
+        
+        if xBottomRight<=x+threshDis or yBottomRight<=y+threshDis:
+            return
+            #super().setRect(x,y,threshDis,threshDis)
+        else:
+            super().setRect(x,y,w,h)
 
 
 class MyNodeItem(QGraphicsEllipseItem):

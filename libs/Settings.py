@@ -3,7 +3,8 @@ import os
 class Settings:
     def __init__(self):
 
-        self.dict={'annoFolderPath':'.','imageFolderPath':'.'}
+        self.dict={'annoFolderPath':'.','imageFolderPath':'.','copyFolderPath':'.'}
+        self.CacheRoot='./Caches'
         self.settingPath='./Caches/Settings.txt'
         self.readSettings()
 
@@ -19,6 +20,10 @@ class Settings:
     
 
     def readSettings(self):
+
+        if not os.path.exists(self.CacheRoot):
+            os.makedirs(self.CacheRoot)
+        
         if not os.path.exists(self.settingPath):
             with open(self.settingPath,'w') as f:
                 pass

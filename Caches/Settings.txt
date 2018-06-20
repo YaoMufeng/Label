@@ -1,2 +1,3 @@
 annoFolderPath,C:/Users/yao/Desktop/images/Annotations
 imageFolderPath,C:/Users/yao/Desktop/images/JPEGImages
+copyFolderPath,C:/Users/yao/Videos

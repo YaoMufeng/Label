@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
         self.mImgList=[]
         self.currentImgPath=''
         self.classTextPath='./Caches/classes.txt'
+        self.copyingDir=''
 
         self.classNameList=[]
         self.initClassNameList()
@@ -127,6 +128,10 @@ class MainWindow(QMainWindow):
         autoSavingAction.setChecked(True)
         autoSavingAction.triggered[bool].connect(self.setAutoSaving)
 
+        imageCopyMenu=menuBar.addMenu('&Image Copy')
+
+        selectCopyDirAction=imageCopyMenu.addAction('select copy dir')
+        selectCopyDirAction.triggered.connect(self.openCopyFolder)
         return menuBar
     
 
@@ -284,6 +289,17 @@ class MainWindow(QMainWindow):
         self.settings.setDict('annoFolderPath',dirpath)
         self.settings.writeSettings()
         self.annoFolderPath=dirpath
+
+    def openCopyFolder(self):
+        defaultOpenDirPath=self.settings.dict['copyFolderPath']
+
+        dirpath = QFileDialog.getExistingDirectory(self,'- Open Anno Folder', defaultOpenDirPath,QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks)
+        if dirpath=='':
+            return
+        self.copyingDir=dirpath
+        self.settings.setDict('copyFolderPath',self.copyingDir)
+        print('copying dir=',self.copyingDir)        
+        self.settings.writeSettings()
 
     def ClearBeforeOpenFolder(self):
         self.rectItemList.clear()
@@ -462,6 +478,11 @@ class MainWindow(QMainWindow):
 
     def deleteBndBox(self,rectItem):
         pass
+    
+    def closeEvent(self,event):
+        print('close window')
+        self.settings.writeSettings()
+        super().closeEvent(event)
 
 class paintWidget(QWidget):
     def __init__(self,mainWindow=None):

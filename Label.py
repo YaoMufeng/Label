@@ -4,6 +4,7 @@ import re
 import subprocess
 import sip
 import os.path
+import shutil
 
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -132,6 +133,11 @@ class MainWindow(QMainWindow):
 
         selectCopyDirAction=imageCopyMenu.addAction('select copy dir')
         selectCopyDirAction.triggered.connect(self.openCopyFolder)
+
+        copyToDirAction=imageCopyMenu.addAction('copy to dir')
+        copyToDirAction.setShortcut('k')
+        copyToDirAction.triggered.connect(self.copyCurrentImgToDir)
+
         return menuBar
     
 
@@ -403,8 +409,10 @@ class MainWindow(QMainWindow):
                 self.graphicView.graphicScene.addItem(rectItem)
                 self.addRowToTable(name)
 
+    def copyCurrentImgToDir(self):
+        if os.path.exists(self.currentImgPath) and os.path.exists(self.copyingDir):
+            shutil.copy(self.currentImgPath,self.copyingDir)
 
-       
 
 
     def openSelectedImg(self,item=None):
@@ -481,6 +489,9 @@ class MainWindow(QMainWindow):
     
     def closeEvent(self,event):
         print('close window')
+        if self.isAutoSaving:
+            self.saveToXML()
+
         self.settings.writeSettings()
         super().closeEvent(event)
 

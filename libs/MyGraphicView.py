@@ -43,7 +43,12 @@ class MyGraphicView(QGraphicsView):
         self.selectedItem=None
         self.choosedName=None
 
+        self.pixmap=None
+
         self.nodeRadius=3
+        self.scale_ratio=1
+        self.stretch_scale=1
+
 
 
     def initBackGround(self):
@@ -361,21 +366,45 @@ class MyGraphicView(QGraphicsView):
                 print('load gdal image error')
                 return
         
-        imageSize=pixmap.size()
-        width,height=imageSize.width(),imageSize.height()
+        self.mainWindow.pixmap=pixmap
+        self.pixmap=pixmap
 
-        frameWidth=self.geometry().width()
 
-        scale_ratio=width/frameWidth
+        imageSize=self.pixmap.size()
+        imgWidth,imgHeight=imageSize.width(),imageSize.height()
+
 
         self.graphicScene.clear()
         self.pixItem=self.graphicScene.addPixmap(pixmap)
-        self.graphicScene.setSceneRect(0,0,pixmap.width(),pixmap.height())
+        self.graphicScene.setSceneRect(0,0,imgWidth,imgHeight)
         
-        self.currentScale=1/self.currentScale
-        self.scale(self.currentScale,self.currentScale)
+
+        self.ScaleToOrigin()
+        self.ScaleToFit()
+
+    def ScaleToOrigin(self):
+        returnScale=1/self.currentScale
+        self.scale(returnScale,returnScale)
         self.currentScale=1
 
+    def ScaleToFit(self):
+        if self.pixmap==None:
+            return
+        
+        imageSize=self.pixmap.size()
+        imgWidth,imgHeight=imageSize.width(),imageSize.height()
+
+        frameWidth=self.geometry().width()
+        frameHeight=self.geometry().height()
+
+        scale_ratio_w=frameWidth/imgWidth
+        scale_ratio_h=frameHeight/imgHeight
+
+        scale_ratio=scale_ratio_w if scale_ratio_w<scale_ratio_h else scale_ratio_h
+
+        self.stretch_scale=scale_ratio
+        self.currentScale=self.currentScale*self.stretch_scale
+        self.scale(self.currentScale,self.currentScale)
 
 
 class MyRectItem(QGraphicsRectItem):

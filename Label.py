@@ -41,6 +41,7 @@ class MainWindow(QMainWindow):
         self.currentXMLName=''
         self.settings=Settings()
 
+        self.pixmap=None
         self.isAutoSaving=True
 
     def initClassNameList(self):
@@ -102,8 +103,13 @@ class MainWindow(QMainWindow):
         saveXMLButton.setAutoRaise(True)
         saveXMLButton.clicked.connect(self.saveToXML)        
 
-  
-        
+
+        fitWindowButton=QToolButton()
+        fitWindowButton.setIcon(QIcon('./Icons/FitWindow1.png'))
+        fitWindowButton.setText(' fit window ')
+        fitWindowButton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        fitWindowButton.setAutoRaise(True)
+        fitWindowButton.clicked.connect(self.fitWindow)
 
         toolbar.addWidget(openFolderButton)  
         toolbar.addWidget(openAnnoFolderButton) 
@@ -111,7 +117,7 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(nextImgButton) 
         toolbar.addWidget(rectButton)
         toolbar.addWidget(saveXMLButton)
-
+        toolbar.addWidget(fitWindowButton)
         return toolBar    
     
     def initMenu(self):
@@ -363,7 +369,7 @@ class MainWindow(QMainWindow):
 
         value=self.ImgListIndex/len(self.mImgList)*100
         self.slider.setValue(value)
-        self.fileListLabel.setText('processed {}/{}'.format(self.ImgListIndex,len(self.mImgList)))
+        self.fileListLabel.setText('processing {}/{}'.format(self.ImgListIndex+1,len(self.mImgList)))
 
         ImgFilePath=self.mImgList[self.ImgListIndex]
 
@@ -476,6 +482,12 @@ class MainWindow(QMainWindow):
                 writeBoxToXML(boxList,xmlpath)
         pass
 
+    def fitWindow(self):
+        if self.pixmap==None:
+            return
+
+        self.graphicView.ScaleToOrigin()
+        self.graphicView.ScaleToFit()
 
     def selectBox(self):
         for item in self.rectItemList:

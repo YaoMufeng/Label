@@ -13,6 +13,7 @@ from libs.MyGraphicView import *
 from libs.ChooseNameForm import *
 from libs.XMLIO import *
 from libs.Settings import *
+from libs.MyTableWidget import *
 
 #this version is connected to github
 #hahahaha
@@ -144,6 +145,10 @@ class MainWindow(QMainWindow):
         copyToDirAction.setShortcut('k')
         copyToDirAction.triggered.connect(self.copyCurrentImgToDir)
 
+        copyBoxAction=imageCopyMenu.addAction('copy box')
+        copyBoxAction.setShortcut('ctrl+c')
+        copyBoxAction.triggered.connect(self.copySelectedBox)
+
         return menuBar
     
 
@@ -171,7 +176,9 @@ class MainWindow(QMainWindow):
         self.filedock.setObjectName(u'Files')
         self.filedock.setWidget(fileListContainer)
         self.addDockWidget(Qt.RightDockWidgetArea, self.filedock)
+
         self.fileListWidget.itemDoubleClicked.connect(self.openSelectedImg)
+        
 
 
     def initBoxTableWidget(self):
@@ -188,7 +195,7 @@ class MainWindow(QMainWindow):
         useDefaultLabelContainer.setLayout(useDefaultLabelQHBoxLayout)
 
         tableLayout.addWidget(useDefaultLabelContainer)
-        self.tableList=QTableWidget()
+        self.tableList=MyTableWidget(self)
 
         colCount=1
         self.tableList.setColumnCount(colCount)
@@ -493,8 +500,22 @@ class MainWindow(QMainWindow):
         for item in self.rectItemList:
             item.unselect()
 
+        self.tableList
         rowIndex=self.tableList.currentRow()
-        self.rectItemList[rowIndex].select()
+        item=self.rectItemList[rowIndex]
+        self.graphicView.selectItem(item)
+
+
+    def copySelectedBox(self):
+
+        print('copy selected box')
+
+        if self.graphicView.selectedItem is not None:
+            copyItem=self.graphicView.selectedItem.copy()
+            txtName=self.graphicView.selectedItem.name
+            self.graphicView.addShape(copyItem,txtName)
+            self.addRowToTable(txtName)
+            self.graphicView.selectItem(copyItem)
 
     def deleteBndBox(self,rectItem):
         pass

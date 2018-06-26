@@ -110,16 +110,13 @@ class MyGraphicView(QGraphicsView):
         for Item in self.mainWindow.rectItemList:
             Item.unselect()
 
-
+        self.selectedItem=None
 
         if item is not None:
             
             if isinstance(item,MyRectItem):
                 tmpItem=item
-                index=self.mainWindow.rectItemList.index(item)
-                self.mainWindow.tableList.selectRow(index)
-                self.selectedItem=item
-                item.select()
+                self.selectItem(item)
             elif isinstance(item,MyNodeItem):
                 tmpItem=item
 
@@ -130,7 +127,17 @@ class MyGraphicView(QGraphicsView):
             self.tempMoveItem=tmpItem
 
         super().mousePressEvent(event)
+    
+    def selectItem(self,item):
+        for Item in self.mainWindow.rectItemList:
+            Item.unselect()
+
+        self.selectedItem=None
         
+        index=self.mainWindow.rectItemList.index(item)
+        self.mainWindow.tableList.selectRow(index)
+        self.selectedItem=item
+        item.select()
         
     def mouseReleaseEvent(self,event):
         self.mousepressed=False
@@ -424,6 +431,26 @@ class MyRectItem(QGraphicsRectItem):
         self.initPen()
 
         self.initNode()
+
+
+    def copy(self):
+
+        rect=self.rect()
+        x=rect.x()
+        y=rect.y()
+        w=rect.width()
+        h=rect.height()
+
+        thresh=10
+
+        x=x-thresh if x>thresh else x
+        y=y-thresh if y>thresh else y
+
+        copyItem=MyRectItem(x,y,w,h,self.scene,self.mainWindow)
+        copyItem.setName(self.name)
+        return copyItem
+
+
 
     def initNode(self):
         #node

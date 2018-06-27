@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
 
 
         rectButton=QToolButton()
-        rectButton.setIcon(QIcon('./Icons/Draw2.png'))
+        rectButton.setIcon(QIcon('./Icons/drawRect2.png'))
         rectButton.setText(' create rect')
         rectButton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         rectButton.setAutoRaise(True)

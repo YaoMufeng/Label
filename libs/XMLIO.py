@@ -15,7 +15,9 @@ ENCODE_METHOD = 'utf-8'
 
 from libs.BoxItem import *
 
-        
+
+
+
 def loadBoxFromXML(xmlpath):
     assert xmlpath.endswith(XML_EXT), "Unsupport file format"
 

@@ -209,7 +209,7 @@ class MyGraphicView(QGraphicsView):
             self.setCursor(Qt.ClosedHandCursor)
 
         self.lastPointPos=pos
-
+        self.mainWindow.setSaveState(True)
 
     def handleDrawing(self,pos,isTemp=True):
         self.lastPointPos=pos
@@ -308,7 +308,7 @@ class MyGraphicView(QGraphicsView):
         self.lastPointPos=pos
 
     def handleDragItem(self,item,pos):
-
+        
         dPos=pos-self.lastPointPos
         dx=dPos.x()
         dy=dPos.y()
@@ -324,6 +324,7 @@ class MyGraphicView(QGraphicsView):
         if not self.RectIsInScene(x+dx,y+dy,w,h):
             return
         item.setRect(x+dx,y+dy,w,h)
+        self.mainWindow.setSaveState(True)
     
     def RectIsInScene(self,x,y,w,h):
         if x<0 or y<0 or x>self.graphicScene.width()-w or y>self.graphicScene.height()-h:
@@ -351,12 +352,14 @@ class MyGraphicView(QGraphicsView):
         self.selectedItem.removeNodeItem()
 
         self.selectedItem=None
+        self.mainWindow.setSaveState(True)
 
     def loadImage(self,ImagePath):
         try:
             pixmap=QPixmap(ImagePath)
         except:
-            print('load image error')
+            msg='load image error'
+            self.mainWindow.writeMsg(msg)
             return
 
         qimage=QImage()
@@ -366,11 +369,12 @@ class MyGraphicView(QGraphicsView):
                 qimage=readGDALFromFile(self.gdalDataSet)
                 pixmap.fromImage(qimage)
             except:
-                print('unable to load')
+                msg='unable to load {}'.format(ImagePath)
+                self.mainWindow.writeMsg(msg)
                 return
 
             if pixmap.isNull():
-                print('load gdal image error')
+                msg='load gdal image error {}'.format(ImagePath)
                 return
         
         self.mainWindow.pixmap=pixmap
@@ -401,8 +405,10 @@ class MyGraphicView(QGraphicsView):
         imageSize=self.pixmap.size()
         imgWidth,imgHeight=imageSize.width(),imageSize.height()
 
-        frameWidth=self.geometry().width()
-        frameHeight=self.geometry().height()
+
+        d=10
+        frameWidth=self.geometry().width()-d
+        frameHeight=self.geometry().height()-d
 
         scale_ratio_w=frameWidth/imgWidth
         scale_ratio_h=frameHeight/imgHeight

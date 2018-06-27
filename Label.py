@@ -3,6 +3,7 @@ import codecs
 import re
 import subprocess
 import sip
+
 import os.path
 import shutil
 
@@ -17,11 +18,14 @@ from libs.MyTableWidget import *
 
 #this version is connected to github
 #hahahaha
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initVariables()
         self.initUI()
+        self.initLog()
 
 
     def initVariables(self):
@@ -44,6 +48,9 @@ class MainWindow(QMainWindow):
 
         self.pixmap=None
         self.isAutoSaving=True
+
+        self.windowResizeEvent=pyqtSignal()
+        self.saveState=False
 
     def initClassNameList(self):
         if os.path.exists(self.classTextPath):
@@ -202,6 +209,7 @@ class MainWindow(QMainWindow):
 
         self.tableList.setHorizontalHeaderItem(0, QTableWidgetItem("class"))  
         self.tableList.clicked.connect(self.selectBox)
+        self.tableList.itemChanged.connect(self.setBoxName)
 
         colWidth=10
         for i in range(colCount):
@@ -249,6 +257,20 @@ class MainWindow(QMainWindow):
         self.graphicView.show()
         self.setCentralWidget(self.graphicView)
 
+
+
+    def initLog(self):
+        logFolder='./log/'
+        if not os.path.exists(logFolder):
+            os.makedirs(logFolder)
+        
+        dateTime=QDateTime.currentDateTime().toString().replace(' ','_').replace(':',';')
+        fileName=dateTime+'.log'
+        filePath=logFolder+fileName
+        self.logFileHandle=open(filePath,'w')
+
+        msg='open window'
+        self.writeMsg(msg)
 
     def initUI(self):
         
@@ -317,7 +339,11 @@ class MainWindow(QMainWindow):
             return
         self.copyingDir=dirpath
         self.settings.setDict('copyFolderPath',self.copyingDir)
-        print('copying dir=',self.copyingDir)        
+
+
+        msg='copying dir={} '.format(self.copyingDir)
+        self.writeMsg(msg)
+
         self.settings.writeSettings()
 
     def ClearBeforeOpenFolder(self):
@@ -348,18 +374,21 @@ class MainWindow(QMainWindow):
     
     def openNextImg(self):
         if len(self.mImgList)<=0:
-            print('No Image To Open')
+            msg='No Image To Open'
+            self.writeMsg(msg)
+            
             return
-        if self.isAutoSaving:
+        if self.isAutoSaving and self.saveState:
             self.saveToXML()
         self.ImgListIndex=self.ImgListIndex+1
         self.openCurrentImg()
 
     def openPrevImg(self):
         if len(self.mImgList)<=0:
-            print('No Image To Open')
+            msg='No Image To Open'
+            self.writeMsg(msg)
             return
-        if self.isAutoSaving:
+        if self.isAutoSaving and self.saveState:
             self.saveToXML()
 
         self.ImgListIndex=self.ImgListIndex-1
@@ -368,6 +397,8 @@ class MainWindow(QMainWindow):
     def openCurrentImg(self):
 
         self.ClearBeforeOpenAnotherImg()
+
+        self.setSaveState(False)
 
         if self.ImgListIndex>=len(self.mImgList):
             self.ImgListIndex=0
@@ -381,6 +412,9 @@ class MainWindow(QMainWindow):
         ImgFilePath=self.mImgList[self.ImgListIndex]
 
         self.graphicView.loadImage(ImgFilePath)
+        msg='load image from {}'.format(ImgFilePath)
+        self.writeMsg(msg)
+
         fileWidgetItem = self.fileListWidget.item(self.ImgListIndex)
         fileWidgetItem.setSelected(True)
         self.fileListWidget.scrollToItem(fileWidgetItem)
@@ -399,11 +433,14 @@ class MainWindow(QMainWindow):
             xmlFilePath=os.path.join(self.annoFolderPath,xmlName)
             self.currentXMLName=xmlName
             if not os.path.exists(xmlFilePath):
-                print('not exist: ',xmlFilePath)
+                msg='not exist: {}'.format(xmlFilePath)
+                self.writeMsg(msg)
                 return
 
             boxList=loadBoxFromXML(xmlFilePath)
             
+            msg='load annotations from {}'.format(xmlFilePath)
+            self.writeMsg(msg)
 
             for boxItem in boxList:
 
@@ -425,11 +462,13 @@ class MainWindow(QMainWindow):
     def copyCurrentImgToDir(self):
         if os.path.exists(self.currentImgPath) and os.path.exists(self.copyingDir):
             shutil.copy(self.currentImgPath,self.copyingDir)
+            msg='copying {} to {}'.format(self.currentImageName,self.copyingDir)
+            self.writeMsg(msg)
 
 
 
     def openSelectedImg(self,item=None):
-        if self.isAutoSaving:
+        if self.isAutoSaving and self.saveState:
             self.saveToXML()
             
         currentIndex=self.mImgList.index(item.text())
@@ -441,7 +480,8 @@ class MainWindow(QMainWindow):
     
     def setAutoSaving(self,autoSaving):
         self.isAutoSaving=autoSaving
-        print(self.isAutoSaving)
+        msg='set auto saving = {}'.format(self.isAutoSaving)
+        self.writeMsg(msg)
 
     def addShape(self,className=None):
         txt=''
@@ -449,31 +489,59 @@ class MainWindow(QMainWindow):
             txt=self.defaultLabelTextLine.text()
             self.addRowToTable(txt)
 
+            self.setSaveState(True)
             return True,txt
         else:
             result,txt=ChooseNameForm(self.classNameList).exec()
             if result==1:
                 self.addRowToTable(txt)
+                self.setSaveState(True)
                 return True,txt
+
+
 
         return False,txt
 
     def addRowToTable(self,txt):
         rowCount=self.tableList.rowCount()
         self.tableList.setRowCount(rowCount+1)
-        
         item=QTableWidgetItem(txt)
         self.tableList.setItem(rowCount,0,item)
         self.tableList.setColumnWidth(0,self.tableList.sizeHintForColumn(0))
         if not txt in self.classNameList:
             self.classNameList.append(txt)
     
+    def setSaveState(self,state):
+        self.saveState=state
+
+    def setBoxName(self):
+        index=self.tableList.currentRow()
+        if index==-1 or index>=len(self.rectItemList):
+            return
+
+
+        boxItem=self.rectItemList[index]
+
+        if self.tableList.currentItem() is None:
+            return
+        name=self.tableList.currentItem().text()
+        boxItem.setName(name)
+
+        self.setSaveState(True)
+
+
+    def writeMsg(self,msg):
+        time=QTime.currentTime().toString()
+        msg=msg+' -- '+time+'\n'
+
+        print(msg)
+        self.logFileHandle.write(msg+'\n')
 
     def saveToXML(self):
-        print('save to xml')
+
 
         if self.annoFolderPath!='' and self.currentXMLName!='':
-            print('begin save')
+            
             boxList=[]
             for rectItem in self.rectItemList:
                 boxItem=BoxItem()
@@ -487,6 +555,8 @@ class MainWindow(QMainWindow):
             if boxList!=[]:
                 xmlpath=os.path.join(self.annoFolderPath,self.currentXMLName)
                 writeBoxToXML(boxList,xmlpath)
+                msg='save to xml {}'.format(xmlpath)
+                self.writeMsg(msg)
         pass
 
     def fitWindow(self):
@@ -495,7 +565,9 @@ class MainWindow(QMainWindow):
 
         self.graphicView.ScaleToOrigin()
         self.graphicView.ScaleToFit()
-
+    def resizeEvent(self,event):
+        super().resizeEvent(event)
+        self.fitWindow()
     def selectBox(self):
         for item in self.rectItemList:
             item.unselect()
@@ -508,7 +580,8 @@ class MainWindow(QMainWindow):
 
     def copySelectedBox(self):
 
-        print('copy selected box')
+        msg='copy selected box'
+        self.writeMsg(msg)
 
         if self.graphicView.selectedItem is not None:
             copyItem=self.graphicView.selectedItem.copy()
@@ -521,11 +594,14 @@ class MainWindow(QMainWindow):
         pass
     
     def closeEvent(self,event):
-        print('close window')
-        if self.isAutoSaving:
+        msg='close window'
+        self.writeMsg(msg)
+        
+        if self.isAutoSaving and self.saveState:
             self.saveToXML()
 
         self.settings.writeSettings()
+        self.logFileHandle.close()
         super().closeEvent(event)
 
 class paintWidget(QWidget):

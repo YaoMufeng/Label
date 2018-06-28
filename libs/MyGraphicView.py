@@ -564,7 +564,7 @@ class MyRectItem(QGraphicsRectItem):
         if xTopLeft<0 or yTopLeft<0 or xBottomRight>self.sceneWidth or yBottomRight>self.sceneHeight:
             return
 
-        threshDis=10
+        threshDis=3
 
         xBottomRight=x+threshDis if (xBottomRight<x+threshDis) else xBottomRight
         yBottomRight=y+threshDis if (yBottomRight<y+threshDis) else yBottomRight

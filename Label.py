@@ -498,8 +498,6 @@ class MainWindow(QMainWindow):
                 self.setSaveState(True)
                 return True,txt
 
-
-
         return False,txt
 
     def addRowToTable(self,txt):

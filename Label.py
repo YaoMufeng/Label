@@ -52,6 +52,8 @@ class MainWindow(QMainWindow):
         self.windowResizeEvent=pyqtSignal()
         self.saveState=False
 
+        self.currentBoxIndex=0
+
     def initClassNameList(self):
         if os.path.exists(self.classTextPath):
             with open(self.classTextPath,'r') as f:
@@ -132,17 +134,20 @@ class MainWindow(QMainWindow):
         
         menuBar=self.menuBar()
 
+        #file menu
         fileMenu=menuBar.addMenu('&File')
         openImgAction=fileMenu.addAction('open image')
         openImgAction.triggered.connect(self.printf)
         openImgAction.setIcon(QIcon('./Icons/OpenImg2.png'),)
         
+        #menu
         menuMenu=menuBar.addMenu('&Menu')
         autoSavingAction=menuMenu.addAction('auto saving')
         autoSavingAction.setCheckable(True)
         autoSavingAction.setChecked(True)
         autoSavingAction.triggered[bool].connect(self.setAutoSaving)
 
+        #image copy menu
         imageCopyMenu=menuBar.addMenu('&Image Copy')
 
         selectCopyDirAction=imageCopyMenu.addAction('select copy dir')
@@ -155,6 +160,16 @@ class MainWindow(QMainWindow):
         copyBoxAction=imageCopyMenu.addAction('copy box')
         copyBoxAction.setShortcut('ctrl+c')
         copyBoxAction.triggered.connect(self.copySelectedBox)
+
+        #box menu
+        boxMenu=menuBar.addMenu('&Box Menu')
+        zoomToPrevBoxAction=boxMenu.addAction('zoom to prev box')
+        zoomToPrevBoxAction.setShortcut('q')
+        zoomToPrevBoxAction.triggered.connect(self.zoomToPrevBox)
+
+        zoomToPrevBoxAction=boxMenu.addAction('zoom to next box')
+        zoomToPrevBoxAction.setShortcut('e')
+        zoomToPrevBoxAction.triggered.connect(self.zoomToNextBox)
 
         return menuBar
     
@@ -549,12 +564,16 @@ class MainWindow(QMainWindow):
 
                 boxItem.setBox(rect.x(),rect.y(),rect.width()+rect.x(),rect.height()+rect.y())
                 boxList.append(boxItem)
-
+            xmlpath=os.path.join(self.annoFolderPath,self.currentXMLName)
             if boxList!=[]:
-                xmlpath=os.path.join(self.annoFolderPath,self.currentXMLName)
                 writeBoxToXML(boxList,xmlpath)
                 msg='save to xml {}'.format(xmlpath)
                 self.writeMsg(msg)
+            else:
+                if os.path.exists(xmlpath):
+                    os.remove(xmlpath)
+
+            
         pass
 
     def fitWindow(self):
@@ -566,6 +585,7 @@ class MainWindow(QMainWindow):
     def resizeEvent(self,event):
         super().resizeEvent(event)
         self.fitWindow()
+
     def selectBox(self):
         for item in self.rectItemList:
             item.unselect()
@@ -574,6 +594,73 @@ class MainWindow(QMainWindow):
         rowIndex=self.tableList.currentRow()
         item=self.rectItemList[rowIndex]
         self.graphicView.selectItem(item)
+
+    def zoomToPrevBox(self):
+        if len(self.rectItemList)==0:
+            return
+
+        item=None
+        if self.graphicView.selectedItem==None:
+            item=self.rectItemList[0]
+        else:
+            index=self.currentBoxIndex
+            index=index-1
+            if index<0:
+                index=len(self.rectItemList)-1
+            
+            self.currentBoxIndex=index
+            item=self.rectItemList[index]
+        
+        self.zoomToBox(item)
+
+    def zoomToNextBox(self):
+        if len(self.rectItemList)==0:
+            return
+
+        item=None
+        if self.graphicView.selectedItem==None:
+            item=self.rectItemList[0]
+        else:
+            index=self.currentBoxIndex
+            index=index+1
+            if index>=len(self.rectItemList):
+                index=0
+            
+            self.currentBoxIndex=index
+            item=self.rectItemList[index]
+        
+        self.zoomToBox(item)
+
+    def zoomToBox(self,boxItem):
+
+        self.graphicView.selectItem(boxItem)
+        rect=boxItem.rect()
+        
+        rectX,rectY,rectWidth,rectHeight=rect.x(),rect.y(),rect.width(),rect.height()
+
+        imageWidth,imageHeight=self.pixmap.width(),self.pixmap.height()
+
+
+        distance=5
+        scaleWidth=imageWidth/(rectWidth+distance)
+        scaleHeight=imageHeight/(rectHeight+distance)
+
+        scale=scaleWidth if scaleWidth<scaleHeight else scaleHeight
+
+        self.graphicView.ScaleToOrigin()
+        self.graphicView.ScaleTo(scale)
+        
+        hbar=self.graphicView.horizontalScrollBar()
+        vbar=self.graphicView.verticalScrollBar()
+
+        hval=(rectX+rectWidth/2)/imageWidth*hbar.maximum()
+        vval=(rectY+rectHeight/2)/imageHeight*vbar.maximum()      
+
+        print('rectPos=({},{}) val=({},{})'.format(rectX,rectY,hval,vval))
+        hbar.setValue(hval)
+        vbar.setValue(vval)    
+        print(hbar.value(),vbar.value())
+
 
 
     def copySelectedBox(self):

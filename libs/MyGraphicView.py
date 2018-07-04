@@ -136,6 +136,8 @@ class MyGraphicView(QGraphicsView):
         
         index=self.mainWindow.rectItemList.index(item)
         self.mainWindow.tableList.selectRow(index)
+
+        self.mainWindow.currentBoxIndex=index
         self.selectedItem=item
         item.select()
         
@@ -418,6 +420,15 @@ class MyGraphicView(QGraphicsView):
         self.stretch_scale=scale_ratio
         self.currentScale=self.currentScale*self.stretch_scale
         self.scale(self.currentScale,self.currentScale)
+
+    def ScaleTo(self,scale):        
+        returnScale=1/self.currentScale
+        self.scale(returnScale,returnScale)
+        self.currentScale=1
+
+        self.scale(scale,scale)
+        self.currentScale=scale
+
 
 
 class MyRectItem(QGraphicsRectItem):

@@ -15,7 +15,7 @@ from libs.ChooseNameForm import *
 from libs.XMLIO import *
 from libs.Settings import *
 from libs.MyTableWidget import *
-
+from libs.MyColor import *
 #this version is connected to github
 #hahahaha
 
@@ -224,7 +224,8 @@ class MainWindow(QMainWindow):
 
         self.tableList.setHorizontalHeaderItem(0, QTableWidgetItem("class"))  
         self.tableList.clicked.connect(self.selectBox)
-        self.tableList.itemChanged.connect(self.setBoxName)
+        self.tableList.itemChanged[QTableWidgetItem].connect(self.setBoxName)
+        self.tableList.itemClicked.connect(self.setBoxLineColor)
 
         colWidth=10
         for i in range(colCount):
@@ -470,8 +471,8 @@ class MainWindow(QMainWindow):
                 rectItem.setName(name)
                 rectItem.setScore(score)
 
-                self.rectItemList.append(rectItem)
-                self.graphicView.graphicScene.addItem(rectItem)
+                #self.rectItemList.append(rectItem)
+                self.graphicView.addShape(rectItem,name)
                 self.addRowToTable(name)
 
     def copyCurrentImgToDir(self):
@@ -519,29 +520,87 @@ class MainWindow(QMainWindow):
         rowCount=self.tableList.rowCount()
         self.tableList.setRowCount(rowCount+1)
         item=QTableWidgetItem(txt)
+
+        if self.tableList.columnCount()<2:
+            self.tableList.setColumnCount(2)
+
+        colorItem=QTableWidgetItem(' ')
         self.tableList.setItem(rowCount,0,item)
+        self.tableList.setItem(rowCount,1,colorItem)
+
+
+
         self.tableList.setColumnWidth(0,self.tableList.sizeHintForColumn(0))
+        self.tableList.setColumnWidth(1,self.tableList.rowHeight(0))
         if not txt in self.classNameList:
             self.classNameList.append(txt)
+        
+        color=MyColor.getColorByID(self.classNameList.index(txt))
+        brush=QBrush(color)
+        colorItem.setBackground(brush)
     
     def setSaveState(self,state):
         self.saveState=state
 
-    def setBoxName(self):
-        index=self.tableList.currentRow()
-        if index==-1 or index>=len(self.rectItemList):
+    def setBoxName(self,changedItem):
+        columnIndex=changedItem.column() #we only care to column one,which stores our box name
+        if columnIndex!=0:
             return
 
+        rowIndex=changedItem.row()
+        if rowIndex==-1 or rowIndex>=len(self.rectItemList):
+            return
 
-        boxItem=self.rectItemList[index]
-
+        boxItem=self.rectItemList[rowIndex]
         if self.tableList.currentItem() is None:
             return
-        name=self.tableList.currentItem().text()
-        boxItem.setName(name)
+        newName=self.tableList.currentItem().text()
+        srcName=boxItem.name
+        if srcName==newName:
+            return
 
+        if newName not in self.classNameList:
+            self.classNameList.append(newName)
+        
+        colorID=self.classNameList.index(newName)
+        newColor=MyColor.getColorByID(colorID)
+        boxItem.setLineColor(newColor)
+
+        boxItem.setName(newName)
+        self.graphicView.graphicScene.update()
+      
+        self.tableList.clear()
+        self.tableList.setRowCount(0)
+        for rectItem in self.rectItemList:
+            itemName=rectItem.name
+            self.addRowToTable(itemName)
+        self.graphicView.graphicScene.update()
         self.setSaveState(True)
 
+
+    def setBoxLineColor(self):
+        columnIndex=self.tableList.currentColumn()
+        if columnIndex!=1:
+            return
+
+        rowIndex=self.tableList.currentRow()
+        rectItem=self.rectItemList[rowIndex]
+        name=rectItem.name
+        colorIndex=self.classNameList.index(name)
+        newColor = QColorDialog.getColor()
+        MyColor.setColorByID(colorIndex,newColor)
+        self.tableList.clear()
+        self.tableList.setRowCount(0)
+
+        for rectItem in self.rectItemList:
+            itemName=rectItem.name
+            index=self.classNameList.index(itemName)
+            rectItem.setLineColor(MyColor.getColorByID(index))
+            self.addRowToTable(itemName)
+        self.graphicView.graphicScene.update()
+
+        msg="set box line color"
+        self.writeMsg(msg)
 
     def writeMsg(self,msg):
         time=QTime.currentTime().toString()

@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 
 from libs.gdalIO import *
 from libs.ChooseNameForm import *
-
+from libs.MyColor import *
 import math
 
 
@@ -109,7 +109,7 @@ class MyGraphicView(QGraphicsView):
 
         for Item in self.mainWindow.rectItemList:
             Item.unselect()
-
+        self.mainWindow.tableList.clearSelection()
         self.selectedItem=None
 
         if item is not None:
@@ -286,6 +286,11 @@ class MyGraphicView(QGraphicsView):
     def addShape(self,item,name):
         self.graphicScene.addItem(item)
         item.setName(name)
+        if not name in self.mainWindow.classNameList:
+            self.mainWindow.classNameList.append(name)
+        
+        index=self.mainWindow.classNameList.index(name)
+        item.setLineColor(MyColor.getColorByID(index))
         self.mainWindow.rectItemList.append(item)
 
     def handleDrag(self,pos):
@@ -519,7 +524,7 @@ class MyRectItem(QGraphicsRectItem):
     
     def initPen(self):
         self.pen=QPen(QColor(255,0,0,255))
-        self.pen.setWidth(2)
+        self.pen.setWidth(self.widthBase)
         self.setPen(self.pen)
 
     def setScore(self,score):
@@ -527,6 +532,12 @@ class MyRectItem(QGraphicsRectItem):
     
     def setName(self,name):
         self.name=name
+
+    def setLineColor(self,color):
+        self.pen=QPen(color)
+        self.pen.setWidth(self.widthBase)
+        self.setPen(self.pen)
+        self.update()
 
 
     def initDesigner(self):

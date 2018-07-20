@@ -614,6 +614,11 @@ class MainWindow(QMainWindow):
 
         if self.annoFolderPath!='' and self.currentXMLName!='':
             
+            imageSize=self.pixmap.size()
+
+            image=self.pixmap.toImage()
+            imageChannel=image.bitPlaneCount()/8
+
             boxList=[]
             for rectItem in self.rectItemList:
                 boxItem=BoxItem()
@@ -625,7 +630,7 @@ class MainWindow(QMainWindow):
                 boxList.append(boxItem)
             xmlpath=os.path.join(self.annoFolderPath,self.currentXMLName)
             if boxList!=[]:
-                writeBoxToXML(boxList,xmlpath)
+                writeBoxToXML(boxList,xmlpath,imageSize,imageChannel,self.imageFolderPath,self.currentImageName)
                 msg='save to xml {}'.format(xmlpath)
                 self.writeMsg(msg)
             else:

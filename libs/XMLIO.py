@@ -54,11 +54,36 @@ def loadBoxFromXML(xmlpath):
     return boxList
 
 
-def writeBoxToXML(boxList,xmlpath):
+def writeBoxToXML(boxList,xmlpath,imageSize,imageChannel,imageFolderPath,currentImageName):
     if boxList==[]:
         return
 
+    index1=imageFolderPath.rfind('/')
+    index2=imageFolderPath.rfind('\\')
+
+    folder=''
+    if index1<index2:
+        folder=imageFolderPath.split('\\')[-1]
+    else:
+        folder=imageFolderPath.split('/')[-1]
+
     top=Element('annotation')
+
+    folderElem=SubElement(top,'folder')
+    imageNameElem=SubElement(top,'filename')
+
+    folderElem.text=folder
+    imageNameElem.text=currentImageName
+
+    sizeElem=SubElement(top,'size')
+
+    widthElem=SubElement(sizeElem,'width')
+    heightElem=SubElement(sizeElem,'height')
+    depthElem=SubElement(sizeElem,'depth')
+
+    widthElem.text=str(imageSize.width())
+    heightElem.text=str(imageSize.height())
+    depthElem.text=str(imageChannel)  
 
     for boxItem in boxList:
 
